@@ -71,11 +71,8 @@ class TestTimeStackItem < Minitest::Test
     assert_equal s,   stack_item.sec
   end
 
-  # Due to the nature of this test (calling Time.now once in this test and
-  # once in #new), this test may fail when two subsequent calls
-  # to Time.now return a different second.
   def test_new_with_integer
-    t = Time.now
+    t = safe_time_now
     y, m, d, h, min, s = t.year, t.month, t.day, t.hour, t.min, t.sec
     stack_item = Timecop::TimeStackItem.new(:freeze, 0)
 
@@ -88,7 +85,7 @@ class TestTimeStackItem < Minitest::Test
   end
 
   def test_new_with_float
-    t = Time.now
+    t = safe_time_now
     y, m, d, h, min, s = t.year, t.month, t.day, t.hour, t.min, t.sec
     stack_item = Timecop::TimeStackItem.new(:freeze, 0.0)
 
@@ -294,6 +291,15 @@ class TestTimeStackItem < Minitest::Test
     Timecop.freeze(dt) do
       now = DateTime.now
       assert_equal dt, now, "#{dt.to_f}, #{now.to_f}"
+    end
+  end
+
+  private
+
+  def safe_time_now
+    loop do
+      t = Time.now
+      return t if t.usec < 900_000
     end
   end
 end
