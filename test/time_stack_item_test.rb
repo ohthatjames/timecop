@@ -84,6 +84,41 @@ class TestTimeStackItem < Minitest::Test
     assert_equal s,   stack_item.sec
   end
 
+  def test_new_with_no_args_ignoring_microseconds
+    t = safe_time_now
+    y, m, d, h, min, s = t.year, t.month, t.day, t.hour, t.min, t.sec
+    stack_item = nil
+    ignoring_microseconds(true) do
+      stack_item = Timecop::TimeStackItem.new(:freeze)
+    end
+
+    assert_equal y,   stack_item.year
+    assert_equal m,   stack_item.month
+    assert_equal d,   stack_item.day
+    assert_equal h,   stack_item.hour
+    assert_equal min, stack_item.min
+    assert_equal s,   stack_item.sec
+    assert_equal 0,   stack_item.usec
+  end
+
+  def test_new_with_no_args_with_microseconds
+    t = safe_time_now
+    y, m, d, h, min, s, usec = t.year, t.month, t.day, t.hour, t.min, t.sec, t.usec
+    stack_item = nil
+    ignoring_microseconds(false) do
+      stack_item = Timecop::TimeStackItem.new(:freeze)
+    end
+
+    assert_equal y,   stack_item.year
+    assert_equal m,   stack_item.month
+    assert_equal d,   stack_item.day
+    assert_equal h,   stack_item.hour
+    assert_equal min, stack_item.min
+    assert_equal s,   stack_item.sec
+
+    assert stack_item.usec > 0
+  end
+
   def test_new_with_integer_0
     t = safe_time_now
     y, m, d, h, min, s = t.year, t.month, t.day, t.hour, t.min, t.sec
@@ -110,6 +145,41 @@ class TestTimeStackItem < Minitest::Test
     assert_equal s,   stack_item.sec
   end
 
+  def test_new_with_integer_ignoring_microseconds
+    t = safe_time_now
+    y, m, d, h, min, s = t.year, t.month, t.day, t.hour, t.min, t.sec
+    stack_item = nil
+    ignoring_microseconds(true) do
+      stack_item = Timecop::TimeStackItem.new(:freeze, 0)
+    end
+
+    assert_equal y,   stack_item.year
+    assert_equal m,   stack_item.month
+    assert_equal d,   stack_item.day
+    assert_equal h,   stack_item.hour
+    assert_equal min, stack_item.min
+    assert_equal s,   stack_item.sec
+    assert_equal 0,   stack_item.usec
+  end
+
+  def test_new_with_integer_with_microseconds
+    t = safe_time_now
+    y, m, d, h, min, s, usec = t.year, t.month, t.day, t.hour, t.min, t.sec, t.usec
+    stack_item = nil
+    ignoring_microseconds(false) do
+      stack_item = Timecop::TimeStackItem.new(:freeze, 0)
+    end
+
+    assert_equal y,   stack_item.year
+    assert_equal m,   stack_item.month
+    assert_equal d,   stack_item.day
+    assert_equal h,   stack_item.hour
+    assert_equal min, stack_item.min
+    assert_equal s,   stack_item.sec
+
+    assert stack_item.usec > 0
+  end
+
   def test_new_with_float_0_0
     t = safe_time_now
     y, m, d, h, min, s = t.year, t.month, t.day, t.hour, t.min, t.sec
@@ -134,6 +204,41 @@ class TestTimeStackItem < Minitest::Test
     assert_equal h,   stack_item.hour
     assert_equal min, stack_item.min
     assert_equal s,   stack_item.sec
+  end
+
+  def test_new_with_float_ignoring_microseconds
+    t = safe_time_now
+    y, m, d, h, min, s = t.year, t.month, t.day, t.hour, t.min, t.sec
+    stack_item = nil
+    ignoring_microseconds(true) do
+      stack_item = Timecop::TimeStackItem.new(:freeze, 0.0)
+    end
+
+    assert_equal y,   stack_item.year
+    assert_equal m,   stack_item.month
+    assert_equal d,   stack_item.day
+    assert_equal h,   stack_item.hour
+    assert_equal min, stack_item.min
+    assert_equal s,   stack_item.sec
+    assert_equal 0,   stack_item.usec
+  end
+
+  def test_new_with_float_with_microseconds
+    t = safe_time_now
+    y, m, d, h, min, s, usec = t.year, t.month, t.day, t.hour, t.min, t.sec, t.usec
+    stack_item = nil
+    ignoring_microseconds(false) do
+      stack_item = Timecop::TimeStackItem.new(:freeze, 0.0)
+    end
+
+    assert_equal y,   stack_item.year
+    assert_equal m,   stack_item.month
+    assert_equal d,   stack_item.day
+    assert_equal h,   stack_item.hour
+    assert_equal min, stack_item.min
+    assert_equal s,   stack_item.sec
+
+    assert stack_item.usec > 0
   end
 
   def test_new_with_individual_arguments
@@ -338,7 +443,15 @@ class TestTimeStackItem < Minitest::Test
   def safe_time_now
     loop do
       t = Time.now
-      return t if t.usec < 900_000
+      return t if t.usec < 900_000 && t.usec > 0
     end
+  end
+
+  def ignoring_microseconds(ignore, &block)
+    original_ignore_microseconds = Timecop.ignore_microseconds
+    Timecop.ignore_microseconds = ignore
+    block.call
+  ensure
+    Timecop.ignore_microseconds = original_ignore_microseconds
   end
 end
