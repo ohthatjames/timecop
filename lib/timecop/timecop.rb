@@ -119,6 +119,14 @@ class Timecop
       instance.send(:thread_safe)
     end
 
+    def ignore_milliseconds=(ignore)
+      instance.send(:ignore_milliseconds=, ignore)
+    end
+
+    def ignore_milliseconds
+      instance.send(:ignore_milliseconds)
+    end
+
     # Returns whether or not Timecop is currently frozen/travelled
     def frozen?
       !instance.send(:stack).empty?
@@ -175,6 +183,7 @@ class Timecop
     @stack = []
     @safe = nil
     @thread_safe = false
+    @ignore_milliseconds = false
   end
 
   def thread_safe=(t)
@@ -184,6 +193,15 @@ class Timecop
 
   def thread_safe
     @thread_safe
+  end
+
+  def ignore_milliseconds=(ignore)
+    initialize
+    @ignore_milliseconds = ignore
+  end
+
+  def ignore_milliseconds
+    @ignore_milliseconds
   end
 
   def travel(mock_type, *args, &block) #:nodoc:

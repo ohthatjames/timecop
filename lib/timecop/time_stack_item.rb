@@ -38,6 +38,10 @@ class Timecop
         time.sec
       end
 
+      def usec
+        time.usec
+      end
+
       def utc_offset
         time.utc_offset
       end
@@ -106,9 +110,9 @@ class Timecop
         elsif Object.const_defined?(:Date) && arg.is_a?(Date)
           time_klass.local(arg.year, arg.month, arg.day, 0, 0, 0)
         elsif args.empty? && (arg.kind_of?(Integer) || arg.kind_of?(Float))
-          time_klass.now + arg
+          time_klass_now + arg
         elsif arg.nil?
-          time_klass.now
+          time_klass_now
         else
           if arg.is_a?(String) && Time.respond_to?(:parse)
             time_klass.parse(arg)
@@ -135,6 +139,11 @@ class Timecop
 
       def time_klass
         Time.respond_to?(:zone) && Time.zone ? Time.zone : Time
+      end
+
+      def time_klass_now
+        now = time_klass.now
+        Timecop.ignore_milliseconds ? time_klass.at(now.to_i) : now
       end
     end
 end
