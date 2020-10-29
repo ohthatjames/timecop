@@ -71,7 +71,20 @@ class TestTimeStackItem < Minitest::Test
     assert_equal s,   stack_item.sec
   end
 
-  def test_new_with_integer
+  def test_new_with_no_args
+    t = safe_time_now
+    y, m, d, h, min, s = t.year, t.month, t.day, t.hour, t.min, t.sec
+    stack_item = Timecop::TimeStackItem.new(:freeze)
+
+    assert_equal y,   stack_item.year
+    assert_equal m,   stack_item.month
+    assert_equal d,   stack_item.day
+    assert_equal h,   stack_item.hour
+    assert_equal min, stack_item.min
+    assert_equal s,   stack_item.sec
+  end
+
+  def test_new_with_integer_0
     t = safe_time_now
     y, m, d, h, min, s = t.year, t.month, t.day, t.hour, t.min, t.sec
     stack_item = Timecop::TimeStackItem.new(:freeze, 0)
@@ -84,10 +97,36 @@ class TestTimeStackItem < Minitest::Test
     assert_equal s,   stack_item.sec
   end
 
-  def test_new_with_float
+  def test_new_with_integer_2
+    t = safe_time_now + 2
+    y, m, d, h, min, s = t.year, t.month, t.day, t.hour, t.min, t.sec
+    stack_item = Timecop::TimeStackItem.new(:freeze, 2)
+
+    assert_equal y,   stack_item.year
+    assert_equal m,   stack_item.month
+    assert_equal d,   stack_item.day
+    assert_equal h,   stack_item.hour
+    assert_equal min, stack_item.min
+    assert_equal s,   stack_item.sec
+  end
+
+  def test_new_with_float_0_0
     t = safe_time_now
     y, m, d, h, min, s = t.year, t.month, t.day, t.hour, t.min, t.sec
     stack_item = Timecop::TimeStackItem.new(:freeze, 0.0)
+
+    assert_equal y,   stack_item.year
+    assert_equal m,   stack_item.month
+    assert_equal d,   stack_item.day
+    assert_equal h,   stack_item.hour
+    assert_equal min, stack_item.min
+    assert_equal s,   stack_item.sec
+  end
+
+  def test_new_with_float_3_5
+    t = safe_time_now + 3.0
+    y, m, d, h, min, s = t.year, t.month, t.day, t.hour, t.min, t.sec
+    stack_item = Timecop::TimeStackItem.new(:freeze, 3.0)
 
     assert_equal y,   stack_item.year
     assert_equal m,   stack_item.month
